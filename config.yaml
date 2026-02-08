@@ -1,0 +1,30 @@
+# 仓库配置
+repository:
+  owner: "dumeym"
+  name: "ai-change-alert"
+  workflow_id: "analyze-article.yml"
+
+# Wechaty 配置
+wechaty:
+  puppet: "wechaty-puppet-wechat"
+  name: "AI冲击监测助手"
+
+# 行业分类
+industries:
+  - "科技与互联网"
+  - "医疗健康"
+  - "教育培训"
+  - "金融服务"
+  - "内容创作"
+  - "制造业"
+  - "零售电商"
+  - "法律服务"
+
+# 冲击类型
+impact_types:
+  - "就业影响"
+  - "效率提升"
+  - "商业模式变革"
+  - "成本降低"
+  - "创新突破"
+  - "监管政策"

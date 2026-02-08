@@ -1,0 +1,65 @@
+name: AI Impact Analysis
+
+on:
+  workflow_dispatch:
+    inputs:
+      article_url:
+        required: true
+        type: string
+        description: "要分析的文章链接"
+      user:
+        type: string
+        description: "发送者昵称"
+
+jobs:
+  analyze-article:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出仓库代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Python 环境
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 安装依赖
+        run: |
+          pip install requests beautifulsoup4 python-dotenv
+
+      - name: 调用 AI 分析文章
+        uses: actions/ai-inference@v1
+        with:
+          model: deepseek/deepseek-r1:latest
+          prompt: |
+            请分析以下文章，提取关于 AI 对行业冲击的关键信息：
+            文章链接: ${{ inputs.article_url }}
+
+            请按以下 JSON 格式输出（必须是纯JSON，不要有其他内容）：
+            {
+              "title": "文章标题",
+              "url": "${{ inputs.article_url }}",
+              "date": "${{ github.event.head_commit.timestamp }}",
+              "industry": "受影响行业（从：科技与互联网、医疗健康、教育培训、金融服务、内容创作、制造业、零售电商、法律服务中选择）",
+              "impact_type": "冲击类型（如：就业影响、效率提升、商业模式变革、成本降低等）",
+              "impact_level": "影响程度（高/中/低）",
+              "summary": "简短摘要（50字以内）",
+              "key_points": ["要点1", "要点2", "要点3"],
+              "companies_mentioned": ["公司A", "公司B"],
+              "technologies": ["技术A", "技术B"]
+            }
+          api-key: ${{ secrets.DEEPSEEK_API_KEY }}
+
+      - name: 运行 README 更新脚本
+        env:
+          ARTICLE_DATA: ${{ steps.analyze.outputs.response }}
+        run: |
+          python scripts/update_readme.py "$ARTICLE_DATA"
+
+      - name: 提交更改
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add README.md
+          git commit -m "Update README: 文章分析结果"
+          git push
